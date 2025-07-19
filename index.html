@@ -1,0 +1,2930 @@
+<!DOCTYPE html><html lang="en"><head><meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-inline' 'unsafe-eval' data: blob: https://cdnjs.cloudflare.com https://cdn.jsdelivr.net https://code.jquery.com https://unpkg.com https://d3js.org https://threejs.org https://cdn.plot.ly https://stackpath.bootstrapcdn.com https://maps.googleapis.com https://cdn.tailwindcss.com https://ajax.googleapis.com https://kit.fontawesome.com https://cdn.datatables.net https://maxcdn.bootstrapcdn.com https://code.highcharts.com https://tako-static-assets-production.s3.amazonaws.com https://www.youtube.com https://fonts.googleapis.com https://fonts.gstatic.com https://pfst.cf2.poecdn.net https://puc.poecdn.net https://i.imgur.com https://wikimedia.org https://*.icons8.com https://*.giphy.com https://picsum.photos https://images.unsplash.com; frame-src 'self' https://www.youtube.com https://trytako.com; child-src 'self'; manifest-src 'self'; worker-src 'self'; upgrade-insecure-requests; block-all-mixed-content;">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Can't Decide?</title>
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#0f172a">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Can't Decide?">
+    <link rel="apple-touch-icon" href="icon-192.png">
+    <link rel="icon" type="image/png" sizes="512x512" href="icon-512.png">
+    <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/service-worker.js').then(registration => {
+                    console.log('ServiceWorker registration successful with scope: ', registration.scope);
+                }, err => {
+                    console.log('ServiceWorker registration failed: ', err);
+                });
+            });
+        }
+    </script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #6366f1;
+            --primary-dark: #4f46e5;
+            --secondary: #8b5cf6;
+            --accent: #ec4899;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --bg: #0f172a;
+            --surface: #1e293b;
+            --surface-light: #334155;
+            --text: #e2e8f0;
+            --text-dim: #94a3b8;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        .background-effects {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            overflow: hidden;
+            z-index: 0;
+        }
+
+        .floating-emoji {
+            position: absolute;
+            font-size: 2rem;
+            animation: float 20s infinite ease-in-out;
+            opacity: 0.1;
+        }
+
+        @keyframes float {
+            0%, 100% {
+                transform: translateY(0) translateX(0) rotate(0deg);
+            }
+            33% {
+                transform: translateY(-100px) translateX(50px) rotate(120deg);
+            }
+            66% {
+                transform: translateY(50px) translateX(-50px) rotate(240deg);
+            }
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+            width: 100%;
+            flex: 1;
+            position: relative;
+            z-index: 1;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            animation: fadeInDown 0.8s ease-out;
+        }
+
+        .header h1 {
+            font-size: clamp(2.5rem, 6vw, 4rem);
+            background: linear-gradient(135deg, var(--primary), var(--secondary), var(--accent));
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 10px;
+            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
+        }
+
+        .header p {
+            color: var(--text-dim);
+            font-size: 1.2rem;
+        }
+
+        .screen {
+            display: none;
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        .screen.active {
+            display: block;
+        }
+
+        .card {
+            background: var(--surface);
+            border-radius: 20px;
+            padding: 35px;
+            margin-bottom: 20px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+            border: 1px solid var(--surface-light);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(99,102,241,0.05) 0%, transparent 70%);
+            animation: pulse 4s ease-in-out infinite;
+            pointer-events: none;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        .main-menu {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .menu-card {
+            background: linear-gradient(135deg, var(--surface-light), var(--surface));
+            border-radius: 16px;
+            padding: 30px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+            position: relative;
+            z-index: 1;
+        }
+
+        .menu-card:hover {
+            transform: translateY(-5px);
+            border-color: var(--primary);
+            box-shadow: 0 12px 30px rgba(99, 102, 241, 0.3);
+        }
+
+        .menu-card-icon {
+            font-size: 3rem;
+            margin-bottom: 15px;
+        }
+
+        .menu-card h3 {
+            margin-bottom: 10px;
+            color: var(--text);
+        }
+
+        .menu-card p {
+            color: var(--text-dim);
+            font-size: 0.9rem;
+        }
+
+        .category-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .category-btn {
+            padding: 15px;
+            background: var(--bg);
+            border: 2px solid var(--surface-light);
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .category-btn:hover {
+            transform: translateY(-3px);
+            border-color: var(--primary);
+            background: rgba(99, 102, 241, 0.1);
+        }
+
+        .category-btn.active {
+            border-color: var(--primary);
+            background: rgba(99, 102, 241, 0.2);
+            transform: scale(1.05);
+        }
+
+        .category-btn-icon {
+            font-size: 2rem;
+            margin-bottom: 5px;
+        }
+
+        .filter-section {
+            background: var(--bg);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .filter-group {
+            margin-bottom: 15px;
+        }
+
+        .filter-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: var(--text);
+        }
+
+        .filter-chips {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .filter-chip {
+            padding: 8px 16px;
+            background: var(--surface-light);
+            border: 2px solid transparent;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.9rem;
+            user-select: none;
+        }
+
+        .filter-chip:hover {
+            border-color: var(--secondary);
+            transform: translateY(-2px);
+        }
+
+        .filter-chip.active {
+            background: var(--secondary);
+            color: white;
+            border-color: var(--secondary);
+        }
+
+        .suggestions-container {
+            max-height: 500px;
+            overflow-y: auto;
+            padding: 10px;
+            background: var(--bg);
+            border-radius: 12px;
+            margin-bottom: 20px;
+        }
+
+        .suggestions-container::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .suggestions-container::-webkit-scrollbar-track {
+            background: var(--surface-light);
+            border-radius: 4px;
+        }
+
+        .suggestions-container::-webkit-scrollbar-thumb {
+            background: var(--primary);
+            border-radius: 4px;
+        }
+
+        .suggestions-container::-webkit-scrollbar-thumb:hover {
+            background: var(--primary-dark);
+        }
+
+        .suggestion-item {
+            padding: 15px;
+            margin-bottom: 10px;
+            background: var(--surface);
+            border-radius: 10px;
+            border: 2px solid var(--surface-light);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            user-select: none;
+        }
+
+        .suggestion-item:hover {
+            border-color: var(--primary);
+            transform: translateX(5px);
+        }
+
+        .suggestion-item.selected {
+            background: rgba(99, 102, 241, 0.2);
+            border-color: var(--primary);
+        }
+
+        .suggestion-info {
+            flex: 1;
+        }
+
+        .suggestion-name {
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+
+        .suggestion-tags {
+            display: flex;
+            gap: 5px;
+            flex-wrap: wrap;
+        }
+
+        .suggestion-tag {
+            padding: 3px 8px;
+            background: var(--surface-light);
+            border-radius: 12px;
+            font-size: 0.75rem;
+            color: var(--text-dim);
+        }
+
+        .suggestion-checkbox {
+            font-size: 1.5rem;
+            transition: transform 0.3s ease;
+        }
+
+        .suggestion-item.selected .suggestion-checkbox {
+            transform: scale(1.2);
+        }
+
+        .surprise-wheel {
+            width: 250px;
+            height: 250px;
+            margin: 20px auto;
+            position: relative;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+        }
+
+        .surprise-wheel:hover {
+            transform: scale(1.05);
+        }
+
+        .surprise-wheel-inner {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            background: conic-gradient(
+                from 0deg,
+                #6366f1 0deg 60deg,
+                #8b5cf6 60deg 120deg,
+                #ec4899 120deg 180deg,
+                #f59e0b 180deg 240deg,
+                #10b981 240deg 300deg,
+                #14b8a6 300deg 360deg
+            );
+            position: relative;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+            animation: gentleSpin 20s linear infinite;
+        }
+
+        @keyframes gentleSpin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .surprise-wheel-inner.spinning {
+            animation: fastSpin 0.5s ease-in-out;
+        }
+
+        @keyframes fastSpin {
+            from { transform: rotate(0deg) scale(1); }
+            50% { transform: scale(0.95); }
+            to { transform: rotate(720deg) scale(1); }
+        }
+
+        .surprise-center {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 80%;
+            height: 80%;
+            background: var(--surface);
+            border-radius: 50%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            box-shadow: inset 0 4px 10px rgba(0,0,0,0.3);
+        }
+
+        .surprise-text {
+            font-size: 2rem;
+            margin-bottom: 10px;
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: var(--text);
+        }
+
+.input-group input, .input-group select, .option-item input, .participant-name-input {
+    width: 100%;
+    padding: 14px 18px;
+    background: var(--bg);
+    border: 2px solid var(--surface-light);
+    border-radius: 12px;
+    color: var(--text);
+    font-size: 16px;
+    transition: all 0.3s ease;
+}
+
+.input-group input:focus, .input-group select:focus, .option-item input:focus, .participant-name-input:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.2);
+    transform: translateY(-2px);
+}
+
+        .btn {
+            padding: 14px 28px;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.3);
+            transform: translate(-50%, -50%);
+            transition: width 0.6s, height 0.6s;
+        }
+
+        .btn:active::before {
+            width: 300px;
+            height: 300px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: white;
+            box-shadow: 0 4px 15px rgba(99, 102, 241, 0.3);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(99, 102, 241, 0.5);
+        }
+
+        .btn-secondary {
+            background: var(--surface-light);
+            color: var(--text);
+        }
+
+        .btn-secondary:hover {
+            background: linear-gradient(135deg, var(--surface-light), var(--surface));
+            transform: translateY(-2px);
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, var(--success), #059669);
+            color: white;
+            box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
+        }
+
+        .btn-warning {
+            background: linear-gradient(135deg, var(--warning), #dc2626);
+            color: white;
+            box-shadow: 0 4px 15px rgba(245, 158, 11, 0.3);
+        }
+
+        .participant-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .participant-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px;
+            background: var(--bg);
+            border-radius: 10px;
+            border: 2px solid transparent;
+            transition: all 0.3s ease;
+        }
+
+        .participant-item.completed {
+            border-color: var(--success);
+            background: rgba(16, 185, 129, 0.1);
+        }
+
+        .participant-avatar {
+            font-size: 2rem;
+        }
+
+        .option-item {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 12px;
+            animation: slideIn 0.3s ease-out;
+        }
+
+.option-item input {
+    flex: 1;
+}
+
+        .option-item .btn {
+            padding: 14px 18px;
+        }
+
+        .choice-section {
+            margin-bottom: 30px;
+            opacity: 0;
+            animation: fadeInUp 0.5s ease-out forwards;
+        }
+
+        .choice-section:nth-child(1) { animation-delay: 0.1s; }
+        .choice-section:nth-child(2) { animation-delay: 0.2s; }
+        .choice-section:nth-child(3) { animation-delay: 0.3s; }
+
+        .choice-label {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .choice-number {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 35px;
+            height: 35px;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            border-radius: 50%;
+            font-weight: 700;
+            font-size: 1.1rem;
+        }
+
+        .choice-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 15px;
+        }
+
+        .choice-card {
+            padding: 20px;
+            background: var(--bg);
+            border: 3px solid var(--surface-light);
+            border-radius: 16px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+            min-height: 80px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 500;
+        }
+
+        .choice-card:hover {
+            transform: translateY(-5px) scale(1.02);
+            box-shadow: 0 12px 30px rgba(99, 102, 241, 0.3);
+        }
+
+        .choice-card.selected-first {
+            border-color: var(--primary);
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.2), rgba(79, 70, 229, 0.1));
+            transform: scale(1.05);
+        }
+
+        .choice-card.selected-second {
+            border-color: var(--secondary);
+            background: linear-gradient(135deg, rgba(139, 92, 246, 0.15), rgba(139, 92, 246, 0.05));
+        }
+
+        .choice-card.selected-third {
+            border-color: var(--warning);
+            background: rgba(245, 158, 11, 0.1);
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: var(--surface-light);
+            border-radius: 4px;
+            overflow: hidden;
+            margin-bottom: 20px;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            transition: width 0.5s ease;
+        }
+
+        .wheel-container {
+            position: relative;
+            width: 300px;
+            height: 300px;
+            margin: 0 auto 30px;
+        }
+
+        .wheel {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+            transition: transform 3s cubic-bezier(0.17, 0.67, 0.12, 0.99);
+        }
+
+        .wheel-segment {
+            position: absolute;
+            width: 50%;
+            height: 50%;
+            transform-origin: right bottom;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            font-size: 0.9rem;
+            color: white;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .wheel-center {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 60px;
+            height: 60px;
+            background: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            z-index: 10;
+        }
+
+        .wheel-pointer {
+            position: absolute;
+            top: -20px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 0;
+            height: 0;
+            border-left: 20px solid transparent;
+            border-right: 20px solid transparent;
+            border-top: 40px solid var(--accent);
+            z-index: 11;
+            filter: drop-shadow(0 4px 8px rgba(0,0,0,0.3));
+        }
+
+        /* Coin Flip Styles */
+        .coin-container {
+            position: relative;
+            width: 200px;
+            height: 200px;
+            margin: 30px auto;
+            perspective: 1000px;
+        }
+
+        .coin {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            transform-style: preserve-3d;
+            transition: transform 2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .coin-face {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3rem;
+            font-weight: 700;
+            backface-visibility: hidden;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.5);
+        }
+
+        .coin-heads {
+            background: linear-gradient(135deg, #ffd700, #ffed4e);
+            color: #333;
+            z-index: 2;
+        }
+
+        .coin-tails {
+            background: linear-gradient(135deg, #c0c0c0, #e8e8e8);
+            color: #333;
+            transform: rotateY(180deg);
+        }
+
+        .coin.flipping {
+            animation: coinFlip 2s ease-in-out;
+        }
+
+        @keyframes coinFlip {
+            0% { transform: rotateY(0) rotateX(0); }
+            50% { transform: rotateY(900deg) rotateX(20deg) scale(1.2); }
+            100% { transform: rotateY(var(--final-rotation)) rotateX(0); }
+        }
+
+        .tie-explanation {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .tied-options {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin: 20px 0;
+            flex-wrap: wrap;
+        }
+
+        .tied-option-badge {
+            padding: 10px 20px;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            border-radius: 25px;
+            font-weight: 600;
+            box-shadow: 0 4px 15px rgba(99, 102, 241, 0.3);
+            animation: pulse 2s infinite;
+        }
+
+        .satisfaction-meter {
+            margin: 30px 0;
+            text-align: center;
+        }
+
+        .satisfaction-bar {
+            width: 100%;
+            height: 30px;
+            background: var(--surface-light);
+            border-radius: 15px;
+            overflow: hidden;
+            position: relative;
+            margin: 15px 0;
+        }
+
+        .satisfaction-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #ef4444, #f59e0b, #10b981);
+            transition: width 1.5s ease-out;
+            position: relative;
+        }
+
+        .satisfaction-label {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: white;
+            font-weight: 700;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .result-explanation {
+            background: var(--bg);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-left: 4px solid var(--primary);
+        }
+
+        .vote-visual {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            margin-top: 5px;
+        }
+
+        .vote-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            animation: popIn 0.3s ease-out;
+        }
+
+        .vote-dot.first { background: var(--primary); }
+        .vote-dot.second { background: var(--secondary); }
+        .vote-dot.third { background: var(--warning); }
+
+        @keyframes popIn {
+            0% { transform: scale(0); }
+            80% { transform: scale(1.2); }
+            100% { transform: scale(1); }
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .fun-fact {
+            background: linear-gradient(135deg, rgba(236, 72, 153, 0.1), rgba(99, 102, 241, 0.1));
+            border-radius: 12px;
+            padding: 15px;
+            margin-top: 20px;
+            font-style: italic;
+            color: var(--text-dim);
+            text-align: center;
+        }
+
+        .confetti-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            overflow: hidden;
+            z-index: 1000;
+        }
+
+        .confetti {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            background: var(--accent);
+        }
+
+        @keyframes confetti-fall {
+            0% {
+                transform: translateY(-100vh) rotate(0deg);
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(100vh) rotate(720deg);
+                opacity: 0;
+            }
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .selected-count {
+            background: var(--primary);
+            color: white;
+            padding: 5px 10px;
+            border-radius: 15px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            display: inline-block;
+            margin-left: 10px;
+        }
+
+        .back-btn {
+            padding: 10px 20px;
+            background: var(--surface-light);
+            color: var(--text);
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            margin-bottom: 20px;
+        }
+
+        .back-btn:hover {
+            background: var(--surface);
+            transform: translateX(-5px);
+        }
+
+        .add-more-btn {
+            padding: 12px 24px;
+            background: linear-gradient(135deg, var(--success), #059669);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .add-more-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(16, 185, 129, 0.3);
+        }
+
+        .credits {
+            text-align: center;
+            padding: 20px;
+            color: var(--text-dim);
+            font-size: 0.9rem;
+            border-top: 1px solid var(--surface-light);
+            margin-top: 40px;
+        }
+
+        .credits a {
+            color: var(--primary);
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+
+        .credits a:hover {
+            color: var(--accent);
+            text-decoration: underline;
+        }
+
+        @media (max-width: 640px) {
+            .container {
+                padding: 15px;
+            }
+            
+            .card {
+                padding: 25px;
+            }
+            
+            .wheel-container {
+                width: 250px;
+                height: 250px;
+            }
+            
+            .coin-container {
+                width: 150px;
+                height: 150px;
+            }
+            
+            .surprise-wheel {
+                width: 200px;
+                height: 200px;
+            }
+            
+            .main-menu {
+                grid-template-columns: 1fr;
+            }
+            
+            .category-grid {
+                grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="background-effects">
+        <div class="floating-emoji" style="top: 10%; left: 10%; animation-delay: 0s;">🎮</div>
+        <div class="floating-emoji" style="top: 20%; left: 80%; animation-delay: 2s;">🎬</div>
+        <div class="floating-emoji" style="top: 60%; left: 15%; animation-delay: 4s;">🍕</div>
+        <div class="floating-emoji" style="top: 80%; left: 70%; animation-delay: 6s;">🎵</div>
+        <div class="floating-emoji" style="top: 40%; left: 50%; animation-delay: 8s;">🎯</div>
+    </div>
+
+    <div class="container">
+        <div class="header">
+            <h1>🎯 Can't Decide?</h1>
+            <p>The Ultimate Group Decision Tool!</p>
+        </div>
+        <button id="install-button" style="display: none;" class="btn btn-primary">Install App</button>
+
+        <!-- Main Menu Screen -->
+        <div id="mainMenuScreen" class="screen active">
+            <div class="main-menu">
+                <div class="menu-card" onclick="showSetupScreen()">
+                    <div class="menu-card-icon">✍️</div>
+                    <h3>Custom Options</h3>
+                    <p>Already have ideas? Enter your own options and let the group decide!</p>
+                </div>
+                
+                <div class="menu-card" onclick="showIdeaGeneratorScreen()">
+                    <div class="menu-card-icon">💡</div>
+                    <h3>Idea Generator</h3>
+                    <p>Need inspiration? Browse categories and discover new activities!</p>
+                </div>
+                
+                <div class="menu-card" onclick="showSurpriseScreen()">
+                    <div class="menu-card-icon">🎲</div>
+                    <h3>Surprise Me!</h3>
+                    <p>Feeling adventurous? Let us suggest random activities!</p>
+                </div>
+                <div class="menu-card" onclick="showBillSplitterScreen()">
+                    <div class="menu-card-icon">💰</div>
+                    <h3>Bill Splitter</h3>
+                    <p>Calculate split meal costs, tips, and single bills with ease.</p>
+                </div>
+                <div class="menu-card" onclick="showCoinFlipScreen()">
+                    <div class="menu-card-icon">🪙</div>
+                    <h3>Heads or Tails</h3>
+                    <p>A simple coin flip to settle a quick debate.</p>
+                </div>
+                <div class="menu-card" onclick="showRandomNumberScreen()">
+                    <div class="menu-card-icon">🔢</div>
+                    <h3>Random Number</h3>
+                    <p>Pick a random number from a range you provide.</p>
+                </div>
+                <div class="menu-card" onclick="showListOrdererScreen()">
+                    <div class="menu-card-icon">📋</div>
+                    <h3>List Orderer</h3>
+                    <p>Randomize the order of a list of items.</p>
+                </div>
+            </div>
+            
+            <div class="card" style="text-align: center;">
+                <h3 style="margin-bottom: 15px;">Recent Favorites</h3>
+                <p style="color: var(--text-dim);">Your most popular choices from past decisions:</p>
+                <div id="recentFavorites" style="margin-top: 20px;"></div>
+            </div>
+        </div>
+
+        <!-- Idea Generator Screen -->
+        <div id="ideaGeneratorScreen" class="screen">
+            <button class="back-btn" onclick="showMainMenu()">← Back to Menu</button>
+            
+            <div class="card">
+                <h2 style="text-align: center; margin-bottom: 25px;">
+                    <span style="font-size: 2.5rem;">💡</span><br>
+                    What are you in the mood for?
+                </h2>
+                
+                <div class="category-grid" id="categoryGrid"></div>
+            </div>
+            
+            <div class="card">
+                <div class="filter-section">
+                    <div class="filter-group">
+                        <label>Time of Day</label>
+                        <div class="filter-chips">
+                            <div class="filter-chip" data-filter="time" data-value="morning">🌅 Morning</div>
+                            <div class="filter-chip" data-filter="time" data-value="afternoon">☀️ Afternoon</div>
+                            <div class="filter-chip" data-filter="time" data-value="evening">🌆 Evening</div>
+                            <div class="filter-chip" data-filter="time" data-value="night">🌙 Night</div>
+                            <div class="filter-chip" data-filter="time" data-value="anytime">🕐 Anytime</div>
+                        </div>
+                    </div>
+                    
+                    <div class="filter-group">
+                        <label>Energy Level</label>
+                        <div class="filter-chips">
+                            <div class="filter-chip" data-filter="energy" data-value="chill">😌 Chill</div>
+                            <div class="filter-chip" data-filter="energy" data-value="moderate">🚶 Moderate</div>
+                            <div class="filter-chip" data-filter="energy" data-value="active">🏃 Active</div>
+                            <div class="filter-chip" data-filter="energy" data-value="extreme">🔥 Extreme</div>
+                        </div>
+                    </div>
+                    
+                    <div class="filter-group">
+                        <label>Budget</label>
+                        <div class="filter-chips">
+                            <div class="filter-chip" data-filter="budget" data-value="free">🆓 Free</div>
+                            <div class="filter-chip" data-filter="budget" data-value="cheap">💵 Budget</div>
+                            <div class="filter-chip" data-filter="budget" data-value="moderate">💰 Moderate</div>
+                            <div class="filter-chip" data-filter="budget" data-value="expensive">💎 Splurge</div>
+                        </div>
+                    </div>
+                    
+                    <div class="filter-group">
+                        <label>Location</label>
+                        <div class="filter-chips">
+                            <div class="filter-chip" data-filter="location" data-value="home">🏠 At Home</div>
+                            <div class="filter-chip" data-filter="location" data-value="indoor">🏢 Indoor</div>
+                            <div class="filter-chip" data-filter="location" data-value="outdoor">🌳 Outdoor</div>
+                            <div class="filter-chip" data-filter="location" data-value="travel">✈️ Travel</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card">
+                <h3 style="margin-bottom: 15px;">
+                    Suggested Activities
+                    <span class="selected-count" id="selectedCount">0 selected</span>
+                </h3>
+                <div class="suggestions-container" id="suggestionsContainer"></div>
+                
+                <div class="btn-group">
+                    <button class="btn btn-secondary" onclick="clearSelections()">Clear All</button>
+                    <button class="btn btn-primary" onclick="proceedWithSelections()">Use Selected Options</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Surprise Me Screen -->
+        <div id="surpriseScreen" class="screen">
+            <button class="back-btn" onclick="showMainMenu()">← Back to Menu</button>
+            
+            <div class="card" style="text-align: center;">
+                <h2 style="margin-bottom: 25px;">
+                    <span style="font-size: 2.5rem;">🎲</span><br>
+                    Feeling Lucky?
+                </h2>
+                
+                <p style="color: var(--text-dim); margin-bottom: 30px;">
+                    Click the wheel for a random activity suggestion!
+                </p>
+                
+                <div class="surprise-wheel" onclick="spinSurpriseWheel()">
+                    <div class="surprise-wheel-inner" id="surpriseWheelInner">
+                        <div class="surprise-center">
+                            <div class="surprise-text">🎯</div>
+                            <div style="font-size: 1rem; font-weight: 600;">SPIN ME!</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div id="surpriseResult" style="display: none; margin-top: 30px;">
+                    <h3 style="color: var(--primary); margin-bottom: 15px;">How about...</h3>
+                    <div id="surpriseActivity" style="font-size: 1.8rem; font-weight: 700; margin-bottom: 20px;"></div>
+                    <div id="surpriseDetails" style="color: var(--text-dim); margin-bottom: 30px;"></div>
+                    
+                    <div class="btn-group">
+                        <button class="btn btn-secondary" onclick="spinSurpriseWheel()">Try Another</button>
+                        <button class="btn btn-primary" onclick="useSurpriseSuggestion()">Use This!</button>
+                    </div>
+                </div>
+                
+                <div style="margin-top: 40px; padding: 20px; background: var(--bg); border-radius: 12px;">
+                    <h4 style="margin-bottom: 10px;">Surprise History</h4>
+                    <div id="surpriseHistory" style="color: var(--text-dim);">
+                        <p>No suggestions yet. Give the wheel a spin!</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Setup Screen -->
+        <div id="setupScreen" class="screen">
+            <button class="back-btn" onclick="showMainMenu()">← Back to Menu</button>
+            
+            <div class="card">
+                <h2 style="margin-bottom: 25px; text-align: center;">
+                    <span style="font-size: 2.5rem;">🤔</span><br>
+                    What are your options?
+                </h2>
+                <div class="options-container" id="optionsContainer">
+                    <div class="option-item">
+                        <input type="text" placeholder="Option 1 (e.g., Watch The Office)" value="">
+                    </div>
+                    <div class="option-item">
+                        <input type="text" placeholder="Option 2 (e.g., Play Board Games)" value="">
+                    </div>
+                </div>
+                <div class="btn-group" style="justify-content: flex-start;">
+                    <button class="btn btn-secondary" onclick="addOption()">+ Add Option</button>
+                    <button class="add-more-btn" onclick="showIdeaGeneratorScreen()">💡 Get Ideas</button>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3 style="margin-bottom: 20px;">Who's participating?</h3>
+                <div class="input-group">
+                    <label for="participantCount">Number of Participants</label>
+                    <input type="number" id="participantCount" min="1" max="20" value="2" onchange="updateParticipantNames()">
+                </div>
+                
+                <div id="participantNamesSection" style="display: none;">
+                    <h4 style="margin-bottom: 15px;">Enter Names (Optional)</h4>
+                    <div id="participantNameInputs"></div>
+                </div>
+                
+                <button class="btn btn-primary" onclick="startVoting()" style="width: 100%; margin-top: 20px;">
+                    Let's Decide! 🚀
+                </button>
+            </div>
+        </div>
+
+        <!-- Voting Screen -->
+        <div id="votingScreen" class="screen">
+            <div class="card">
+                <div class="progress-bar">
+                    <div class="progress-fill" id="votingProgress" style="width: 0%"></div>
+                </div>
+                
+                <div style="text-align: center; margin-bottom: 30px;">
+                    <div style="font-size: 3rem; margin-bottom: 10px;" id="participantEmoji">🎮</div>
+                    <h2 id="currentParticipantName" style="color: var(--primary);">Participant 1</h2>
+                    <p style="color: var(--text-dim);">Make your choices secretly! 🤫</p>
+                </div>
+                
+                <div class="choice-section">
+                    <div class="choice-label">
+                        <span class="choice-number">1</span>
+                        <h3>First Choice (5 points)</h3>
+                    </div>
+                    <div class="choice-grid" id="firstChoiceGrid"></div>
+                </div>
+                
+                <div class="choice-section">
+                    <div class="choice-label">
+                        <span class="choice-number">2</span>
+                        <h3>Second Choice (3 points)</h3>
+                    </div>
+                    <div class="choice-grid" id="secondChoiceGrid"></div>
+                </div>
+                
+                <div class="choice-section" id="thirdChoiceSection" style="display: none;">
+                    <div class="choice-label">
+                        <span class="choice-number">3</span>
+                        <h3>Third Choice (1 point)</h3>
+                    </div>
+                    <div class="choice-grid" id="thirdChoiceGrid"></div>
+                </div>
+                
+                <div style="text-align: center; margin-top: 30px;">
+                    <button class="btn btn-primary" onclick="submitVote()" style="min-width: 200px;">
+                        Lock In Choices! 🔒
+                    </button>
+                </div>
+            </div>
+            
+            <div class="card">
+                <h4>Voting Progress</h4>
+                <div class="participant-list" id="participantProgress"></div>
+            </div>
+        </div>
+
+        <!-- Tie Breaker Screen -->
+        <div id="tieBreakerScreen" class="screen">
+            <div class="card">
+                <div class="tie-explanation">
+                    <h2 style="font-size: 2.5rem; margin-bottom: 20px;">⚖️ It's a Tie!</h2>
+                    <p style="font-size: 1.2rem; color: var(--text-dim); margin-bottom: 20px;">
+                        Multiple options are equally popular! Let's flip a coin to decide our fate...
+                    </p>
+                    <div class="tied-options" id="tiedOptions"></div>
+                </div>
+                
+                <div class="coin-container">
+                    <div class="coin" id="coin">
+                        <div class="coin-face coin-heads">
+                            <div>
+                                <div style="font-size: 1.5rem;">HEADS</div>
+                                <div style="font-size: 1rem;">Tie Breaker</div>
+                            </div>
+                        </div>
+                        <div class="coin-face coin-tails">
+                            <div>
+                                <div style="font-size: 1.5rem;">TAILS</div>
+                                <div style="font-size: 1rem;">Random Pick</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div style="text-align: center;">
+                    <p style="margin-bottom: 20px; color: var(--text-dim);">
+                        <strong>Heads:</strong> Everyone votes again from the tied options<br>
+                        <strong>Tails:</strong> The app randomly picks a winner
+                    </p>
+                    <button class="btn btn-warning" onclick="flipCoin()" id="flipButton" style="min-width: 250px;">
+                        Flip the Coin of Destiny! 🪙
+                    </button>
+                    <div id="coinResult" style="margin-top: 30px; display: none;">
+                        <h3 id="coinResultText" style="font-size: 1.8rem; margin-bottom: 20px;"></h3>
+                        <button class="btn btn-primary" onclick="proceedAfterCoinFlip()" id="proceedButton" style="min-width: 200px;"></button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Results Screen -->
+        <div id="resultsScreen" class="screen">
+            <div class="card" style="text-align: center;">
+                <h2 style="margin-bottom: 30px; font-size: 2rem;">🎊 The Moment of Truth! 🎊</h2>
+                
+                <div class="wheel-container">
+                    <div class="wheel-pointer"></div>
+                    <div class="wheel" id="decisionWheel"></div>
+                    <div class="wheel-center">🎯</div>
+                </div>
+                
+                <div style="margin-bottom: 30px;">
+                    <h3 style="color: var(--text-dim); margin-bottom: 10px;">And the winner is...</h3>
+                    <h1 id="winnerOption" style="font-size: 3rem; color: var(--primary); opacity: 0;"></h1>
+                </div>
+                
+                <div class="satisfaction-meter">
+                    <h3>Group Satisfaction Level</h3>
+                    <div class="satisfaction-bar">
+                        <div class="satisfaction-fill" id="satisfactionFill" style="width: 0%">
+                            <span class="satisfaction-label" id="satisfactionLabel">0%</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="result-explanation" id="resultExplanation"></div>
+                
+                <div id="resultsBreakdown" style="text-align: left;"></div>
+                
+                <div class="fun-fact" id="funFact"></div>
+                
+                <button class="btn btn-success" onclick="resetApp()" style="margin-top: 30px;">
+                    Make Another Decision! 🎲
+                </button>
+            </div>
+        </div>
+
+        <!-- Bill Splitter Screen -->
+        <div id="billSplitterScreen" class="screen">
+            <button class="back-btn" onclick="showMainMenu()">← Back to Menu</button>
+            <div class="card">
+                <h2 style="text-align: center; margin-bottom: 25px;">
+                    <span style="font-size: 2.5rem;">💰</span><br>
+                    Bill & Tip Calculator
+                </h2>
+                <div class="input-group">
+                    <label for="billAmount">Bill Amount ($)</label>
+                    <input type="number" id="billAmount" placeholder="e.g., 123.45" oninput="calculateBill()">
+                </div>
+                <div class="input-group">
+                    <label>Tip Percentage</label>
+                    <div class="filter-chips" id="tipPercentages">
+                        <div class="filter-chip" onclick="selectTip(15)">15%</div>
+                        <div class="filter-chip" onclick="selectTip(18)">18%</div>
+                        <div class="filter-chip" onclick="selectTip(20)">20%</div>
+                        <div class="filter-chip" onclick="selectTip(25)">25%</div>
+                    </div>
+                    <input type="number" id="customTip" placeholder="Custom Tip %" oninput="selectCustomTip()" style="margin-top: 10px;">
+                </div>
+                <div class="input-group">
+                    <label for="billPeople">Number of People</label>
+                    <input type="number" id="billPeople" value="1" min="1" oninput="calculateBill()">
+                </div>
+                <div id="billResult" class="result-explanation" style="display: none;"></div>
+            </div>
+        </div>
+
+        <!-- Coin Flip Screen -->
+        <div id="coinFlipScreen" class="screen">
+            <button class="back-btn" onclick="showMainMenu()">← Back to Menu</button>
+            <div class="card" style="text-align: center;">
+                <h2 style="margin-bottom: 25px;">
+                    <span style="font-size: 2.5rem;">🪙</span><br>
+                    Heads or Tails
+                </h2>
+                <div class="coin-container">
+                    <div class="coin" id="featureCoin">
+                        <div class="coin-face coin-heads">HEADS</div>
+                        <div class="coin-face coin-tails">TAILS</div>
+                    </div>
+                </div>
+                <button class="btn btn-primary" onclick="flipFeatureCoin()" id="flipFeatureCoinBtn" style="margin-top: 20px;">Flip Coin</button>
+                <div id="featureCoinResult" style="margin-top: 30px; font-size: 1.5rem; font-weight: bold;"></div>
+            </div>
+        </div>
+
+        <!-- Random Number Screen -->
+        <div id="randomNumberScreen" class="screen">
+            <button class="back-btn" onclick="showMainMenu()">← Back to Menu</button>
+            <div class="card">
+                <h2 style="text-align: center; margin-bottom: 25px;">
+                    <span style="font-size: 2.5rem;">🔢</span><br>
+                    Random Number Generator
+                </h2>
+                <div class="input-group">
+                    <label for="minNumber">Minimum Number</label>
+                    <input type="number" id="minNumber" value="1">
+                </div>
+                <div class="input-group">
+                    <label for="maxNumber">Maximum Number</label>
+                    <input type="number" id="maxNumber" value="100">
+                </div>
+                <button class="btn btn-primary" onclick="generateRandomNumber()" style="width: 100%;">Generate</button>
+                <div id="randomNumberResult" style="margin-top: 30px; text-align: center; font-size: 3rem; font-weight: bold; color: var(--primary);"></div>
+            </div>
+        </div>
+
+        <!-- List Orderer Screen -->
+        <div id="listOrdererScreen" class="screen">
+            <button class="back-btn" onclick="showMainMenu()">← Back to Menu</button>
+            <div class="card">
+                <h2 style="text-align: center; margin-bottom: 25px;">
+                    <span style="font-size: 2.5rem;">📋</span><br>
+                    List Randomizer
+                </h2>
+                <div id="listOrdererContainer">
+                    <div class="option-item">
+                        <input type="text" placeholder="Item 1">
+                    </div>
+                    <div class="option-item">
+                        <input type="text" placeholder="Item 2">
+                    </div>
+                </div>
+                <div class="btn-group" style="justify-content: flex-start; margin-top: 10px; margin-bottom: 20px;">
+                    <button class="btn btn-secondary" onclick="addListItem()">+ Add Item</button>
+                </div>
+                <button class="btn btn-primary" onclick="randomizeList()" style="width: 100%;">Randomize</button>
+                <div id="listOrdererResult" style="margin-top: 20px;"></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="credits">
+        Developed by Daniel A Bissey (FatStinkyPanda) | 
+        <a href="mailto:support@fatstinkypanda.com">support@fatstinkypanda.com</a>
+    </div>
+
+    <div class="confetti-container" id="confettiContainer"></div>
+
+    <script>
+        // Activity Database
+        const activityDatabase = {
+            food: {
+                name: 'Food & Dining',
+                icon: '🍽️',
+                activities: [
+                    { name: 'Pizza Night', tags: ['evening', 'moderate', 'indoor', 'group'], description: 'Order from your favorite pizzeria or make your own!' },
+                    { name: 'Sushi Adventure', tags: ['evening', 'expensive', 'indoor'], description: 'Try new rolls at a Japanese restaurant' },
+                    { name: 'Taco Tuesday', tags: ['evening', 'cheap', 'indoor'], description: 'Build-your-own taco bar at home' },
+                    { name: 'BBQ Cookout', tags: ['afternoon', 'moderate', 'outdoor', 'group'], description: 'Fire up the grill for burgers and hot dogs' },
+                    { name: 'Brunch Outing', tags: ['morning', 'moderate', 'indoor'], description: 'Mimosas and pancakes at a local spot' },
+                    { name: 'Food Truck Tour', tags: ['afternoon', 'cheap', 'outdoor'], description: 'Sample different cuisines from local food trucks' },
+                    { name: 'Cooking Class', tags: ['evening', 'expensive', 'indoor', 'active'], description: 'Learn to make a new cuisine together' },
+                    { name: 'Wine & Cheese Night', tags: ['night', 'moderate', 'indoor', 'chill'], description: 'Pair different wines with artisanal cheeses' },
+                    { name: 'International Potluck', tags: ['evening', 'cheap', 'indoor', 'group'], description: 'Everyone brings a dish from a different country' },
+                    { name: 'Dessert Crawl', tags: ['evening', 'moderate', 'indoor'], description: 'Visit multiple bakeries and ice cream shops' }
+                ]
+            },
+            drinks: {
+                name: 'Drinks & Beverages',
+                icon: '🍹',
+                activities: [
+                    { name: 'Coffee Shop Hopping', tags: ['morning', 'cheap', 'indoor', 'chill'], description: 'Try different local coffee roasters' },
+                    { name: 'Craft Beer Tasting', tags: ['evening', 'moderate', 'indoor'], description: 'Sample local brewery offerings' },
+                    { name: 'Cocktail Making', tags: ['night', 'moderate', 'indoor', 'group'], description: 'Learn to mix classic cocktails at home' },
+                    { name: 'Tea Ceremony', tags: ['afternoon', 'cheap', 'indoor', 'chill'], description: 'Experience different tea traditions' },
+                    { name: 'Smoothie Bowl Party', tags: ['morning', 'cheap', 'indoor', 'healthy'], description: 'Create colorful and healthy smoothie bowls' },
+                    { name: 'Wine Tasting', tags: ['evening', 'expensive', 'indoor', 'chill'], description: 'Visit a local winery or host at home' },
+                    { name: 'Bubble Tea Run', tags: ['afternoon', 'cheap', 'indoor'], description: 'Try different boba flavors and toppings' },
+                    { name: 'Mocktail Competition', tags: ['evening', 'cheap', 'indoor', 'sober'], description: 'Create the best non-alcoholic drinks' }
+                ]
+            },
+            entertainment: {
+                name: 'Entertainment',
+                icon: '🎬',
+                activities: [
+                    { name: 'Movie Marathon', tags: ['evening', 'cheap', 'indoor', 'chill', 'home'], description: 'Binge a film series or genre' },
+                    { name: 'Stand-up Comedy Show', tags: ['night', 'moderate', 'indoor'], description: 'Laugh at a local comedy club' },
+                    { name: 'Escape Room', tags: ['afternoon', 'moderate', 'indoor', 'active', 'group'], description: 'Solve puzzles to escape in time' },
+                    { name: 'Karaoke Night', tags: ['night', 'cheap', 'indoor', 'group'], description: 'Sing your heart out with friends' },
+                    { name: 'Theater Performance', tags: ['evening', 'expensive', 'indoor', 'chill'], description: 'Watch a play or musical' },
+                    { name: 'Drive-In Movie', tags: ['night', 'cheap', 'outdoor', 'chill'], description: 'Classic movie experience in your car' },
+                    { name: 'Netflix Binge', tags: ['anytime', 'free', 'indoor', 'chill', 'home'], description: 'Start that series everyone\'s talking about' },
+                    { name: 'YouTube Rabbit Hole', tags: ['anytime', 'free', 'indoor', 'chill', 'home'], description: 'Discover new channels and creators' },
+                    { name: 'Live Music Venue', tags: ['night', 'moderate', 'indoor'], description: 'Support local bands and artists' },
+                    { name: 'Trivia Night', tags: ['evening', 'cheap', 'indoor', 'group'], description: 'Test your knowledge at a local bar' }
+                ]
+            },
+            games: {
+                name: 'Games & Gaming',
+                icon: '🎮',
+                activities: [
+                    { name: 'Board Game Night', tags: ['evening', 'free', 'indoor', 'group', 'home'], description: 'Break out classics like Monopoly or Settlers of Catan' },
+                    { name: 'Video Game Tournament', tags: ['anytime', 'free', 'indoor', 'group', 'home'], description: 'Compete in Mario Kart, Smash Bros, or FIFA' },
+                    { name: 'Card Games', tags: ['evening', 'free', 'indoor', 'group', 'home'], description: 'Play Poker, Uno, or Cards Against Humanity' },
+                    { name: 'D&D Campaign', tags: ['evening', 'free', 'indoor', 'group', 'home'], description: 'Embark on a fantasy adventure' },
+                    { name: 'Arcade Visit', tags: ['afternoon', 'moderate', 'indoor'], description: 'Play retro games and win prizes' },
+                    { name: 'VR Gaming', tags: ['afternoon', 'moderate', 'indoor', 'active'], description: 'Experience virtual reality games' },
+                    { name: 'Puzzle Night', tags: ['evening', 'free', 'indoor', 'chill', 'home'], description: 'Work on a jigsaw puzzle together' },
+                    { name: 'Chess in the Park', tags: ['afternoon', 'free', 'outdoor', 'chill'], description: 'Strategic battles in the fresh air' },
+                    { name: 'Party Games', tags: ['night', 'free', 'indoor', 'group', 'home'], description: 'Charades, Pictionary, or Heads Up' },
+                    { name: 'Online Gaming', tags: ['anytime', 'free', 'indoor', 'home'], description: 'Play Among Us, Fall Guys, or Fortnite' }
+                ]
+            },
+            outdoor: {
+                name: 'Outdoor Activities',
+                icon: '🏞️',
+                activities: [
+                    { name: 'Hiking Adventure', tags: ['morning', 'free', 'outdoor', 'active'], description: 'Explore local trails and nature' },
+                    { name: 'Beach Day', tags: ['afternoon', 'cheap', 'outdoor', 'chill'], description: 'Sun, sand, and waves' },
+                    { name: 'Camping Trip', tags: ['night', 'moderate', 'outdoor', 'active'], description: 'Sleep under the stars' },
+                    { name: 'Rock Climbing', tags: ['afternoon', 'moderate', 'outdoor', 'extreme'], description: 'Challenge yourself on real rock or indoor walls' },
+                    { name: 'Bike Ride', tags: ['morning', 'free', 'outdoor', 'active'], description: 'Cruise through scenic routes' },
+                    { name: 'Picnic in the Park', tags: ['afternoon', 'cheap', 'outdoor', 'chill'], description: 'Enjoy food and games outdoors' },
+                    { name: 'Kayaking/Canoeing', tags: ['afternoon', 'moderate', 'outdoor', 'active'], description: 'Paddle on lakes or rivers' },
+                    { name: 'Stargazing', tags: ['night', 'free', 'outdoor', 'chill'], description: 'Find constellations and make wishes' },
+                    { name: 'Outdoor Yoga', tags: ['morning', 'free', 'outdoor', 'chill'], description: 'Stretch and breathe in nature' },
+                    { name: 'Geocaching', tags: ['afternoon', 'free', 'outdoor', 'active'], description: 'Modern treasure hunting with GPS' }
+                ]
+            },
+            nightlife: {
+                name: 'Nightlife',
+                icon: '🌃',
+                activities: [
+                    { name: 'Club Dancing', tags: ['night', 'moderate', 'indoor', 'active'], description: 'Dance the night away' },
+                    { name: 'Bar & Grill', tags: ['night', 'moderate', 'indoor', 'chill'], description: 'Good food, drinks, and atmosphere' },
+                    { name: 'Rooftop Bar', tags: ['night', 'expensive', 'outdoor', 'chill'], description: 'Cocktails with a view' },
+                    { name: 'Pool Hall', tags: ['night', 'cheap', 'indoor', 'chill'], description: 'Shoot some pool and relax' },
+                    { name: 'Late Night Diner', tags: ['night', 'cheap', 'indoor', 'chill'], description: 'Comfort food at 2 AM' },
+                    { name: 'Night Market', tags: ['night', 'cheap', 'outdoor', 'active'], description: 'Browse vendors and street food' },
+                    { name: 'Midnight Bowling', tags: ['night', 'moderate', 'indoor', 'active'], description: 'Cosmic bowling with friends' },
+                    { name: 'Jazz Club', tags: ['night', 'moderate', 'indoor', 'chill'], description: 'Smooth music and sophisticated vibes' }
+                ]
+            },
+            creative: {
+                name: 'Creative & Crafts',
+                icon: '🎨',
+                activities: [
+                    { name: 'Paint Night', tags: ['evening', 'moderate', 'indoor', 'chill'], description: 'Create art while sipping wine' },
+                    { name: 'Pottery Class', tags: ['afternoon', 'moderate', 'indoor', 'active'], description: 'Get messy making ceramics' },
+                    { name: 'DIY Crafts', tags: ['afternoon', 'cheap', 'indoor', 'chill', 'home'], description: 'Make decorations or gifts' },
+                    { name: 'Photography Walk', tags: ['morning', 'free', 'outdoor', 'active'], description: 'Capture interesting shots around town' },
+                    { name: 'Blanket Fort Building', tags: ['evening', 'free', 'indoor', 'chill', 'home'], description: 'Relive childhood with epic fort construction' },
+                    { name: 'Ghost Story Night', tags: ['night', 'free', 'indoor', 'chill', 'home'], description: 'Share spooky tales by candlelight' },
+                    { name: 'Scrapbooking', tags: ['afternoon', 'cheap', 'indoor', 'chill', 'home'], description: 'Preserve memories creatively' },
+                    { name: 'Music Jam Session', tags: ['evening', 'free', 'indoor', 'active', 'home'], description: 'Play instruments or sing together' }
+                ]
+            },
+            relaxation: {
+                name: 'Relaxation',
+                icon: '😌',
+                activities: [
+                    { name: 'Spa Day', tags: ['afternoon', 'expensive', 'indoor', 'chill'], description: 'Massages, facials, and relaxation' },
+                    { name: 'Meditation Session', tags: ['morning', 'free', 'indoor', 'chill', 'home'], description: 'Find inner peace and clarity' },
+                    { name: 'Nap Time', tags: ['afternoon', 'free', 'indoor', 'chill', 'home'], description: 'Sometimes the best activity is rest' },
+                    { name: 'Reading Circle', tags: ['evening', 'free', 'indoor', 'chill', 'home'], description: 'Share favorite books or read together' },
+                    { name: 'Bath Bomb Night', tags: ['evening', 'cheap', 'indoor', 'chill', 'home'], description: 'Luxurious baths with candles and music' },
+                    { name: 'Gentle Stretching', tags: ['morning', 'free', 'indoor', 'chill', 'home'], description: 'Easy movements to relax the body' },
+                    { name: 'ASMR Videos', tags: ['night', 'free', 'indoor', 'chill', 'home'], description: 'Relaxing sounds and visuals' },
+                    { name: 'Hammock Time', tags: ['afternoon', 'free', 'outdoor', 'chill'], description: 'Swing gently in the breeze' }
+                ]
+            },
+            events: {
+                name: 'Events & Festivals',
+                icon: '🎪',
+                activities: [
+                    { name: 'Music Festival', tags: ['afternoon', 'expensive', 'outdoor', 'active'], description: 'Multiple bands and good vibes' },
+                    { name: 'Food Festival', tags: ['afternoon', 'moderate', 'outdoor', 'active'], description: 'Sample cuisine from various vendors' },
+                    { name: 'Carnival/Fair', tags: ['evening', 'moderate', 'outdoor', 'active'], description: 'Rides, games, and cotton candy' },
+                    { name: 'Farmers Market', tags: ['morning', 'cheap', 'outdoor', 'chill'], description: 'Fresh produce and local goods' },
+                    { name: 'Art Exhibition', tags: ['afternoon', 'cheap', 'indoor', 'chill'], description: 'Appreciate local or famous artwork' },
+                    { name: 'Sports Game', tags: ['evening', 'moderate', 'indoor', 'active'], description: 'Cheer for your favorite team' },
+                    { name: 'Comedy Festival', tags: ['evening', 'moderate', 'indoor'], description: 'Multiple comedians and lots of laughs' },
+                    { name: 'Renaissance Fair', tags: ['afternoon', 'moderate', 'outdoor', 'active'], description: 'Step back in time with costumes and jousting' }
+                ]
+            },
+            fitness: {
+                name: 'Fitness & Sports',
+                icon: '💪',
+                activities: [
+                    { name: 'Gym Session', tags: ['morning', 'cheap', 'indoor', 'active'], description: 'Lift weights or do cardio' },
+                    { name: 'Basketball Game', tags: ['afternoon', 'free', 'outdoor', 'active'], description: 'Shoot hoops at the local court' },
+                    { name: 'Tennis Match', tags: ['morning', 'cheap', 'outdoor', 'active'], description: 'Friendly competition on the court' },
+                    { name: 'Swimming', tags: ['afternoon', 'cheap', 'indoor', 'active'], description: 'Laps or just floating around' },
+                    { name: 'Rock Wall Climbing', tags: ['afternoon', 'moderate', 'indoor', 'extreme'], description: 'Indoor climbing challenges' },
+                    { name: 'Dance Class', tags: ['evening', 'moderate', 'indoor', 'active'], description: 'Learn salsa, hip-hop, or ballroom' },
+                    { name: 'Parkour', tags: ['afternoon', 'free', 'outdoor', 'extreme'], description: 'Urban obstacle navigation' },
+                    { name: 'Frisbee Golf', tags: ['afternoon', 'cheap', 'outdoor', 'moderate'], description: 'Disc golf in the park' }
+                ]
+            }
+        };
+
+        // Global variables
+        let options = [];
+        let participants = [];
+        let currentParticipantIndex = 0;
+        let votes = [];
+        let firstChoice = null;
+        let secondChoice = null;
+        let thirdChoice = null;
+        let tiedOptions = [];
+        let coinFlipResult = null;
+        let isTieBreakerRound = false;
+        let originalOptions = [];
+        let originalVotes = [];
+        let selectedActivities = new Set();
+        let currentSurpriseSuggestion = null;
+        let surpriseHistory = [];
+        let recentFavorites = [];
+        let activeFilters = {
+            time: null,
+            energy: null,
+            budget: null,
+            location: null
+        };
+        let activeCategories = new Set();
+        
+        const emojis = ['😊', '😎', '🤓', '😄', '🥳', '😋', '🤗', '😁', '🤩', '😇', '🧐', '🤠', '🦄', '🐼', '🦊', '🐸', '🦁', '🐯', '🐻', '🐨'];
+        const avatarEmojis = ['🎮', '🎬', '🍕', '🎵', '📚', '⚽', '🎨', '🍿', '🎸', '🎯', '🎭', '🎪', '🎢', '🎡', '🎠'];
+
+        // Sound effects using Web Audio API
+        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        
+        function playSound(frequency, duration, type = 'sine') {
+            const oscillator = audioContext.createOscillator();
+            const gainNode = audioContext.createGain();
+            
+            oscillator.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+            
+            oscillator.type = type;
+            oscillator.frequency.setValueAtTime(frequency, audioContext.currentTime);
+            gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + duration);
+            
+            oscillator.start(audioContext.currentTime);
+            oscillator.stop(audioContext.currentTime + duration);
+        }
+
+        function playClickSound() {
+            playSound(800, 0.1);
+        }
+
+        function playSuccessSound() {
+            playSound(523.25, 0.1); // C5
+            setTimeout(() => playSound(659.25, 0.1), 100); // E5
+            setTimeout(() => playSound(783.99, 0.2), 200); // G5
+        }
+
+        function playWheelSound() {
+            for (let i = 0; i < 20; i++) {
+                setTimeout(() => playSound(400 + i * 20, 0.05), i * 50);
+            }
+        }
+
+        function playCoinSound() {
+            for (let i = 0; i < 10; i++) {
+                setTimeout(() => playSound(600 + Math.random() * 400, 0.05), i * 100);
+            }
+        }
+
+        // Initialize app
+        function initializeApp() {
+            loadRecentFavorites();
+            setupFilterListeners();
+            
+            // Load existing options if any
+            const existingOptions = getCurrentOptions();
+            if (existingOptions.length > 0) {
+                options = existingOptions;
+                selectedActivities = new Set(existingOptions);
+            }
+        }
+
+        // Get current options from setup screen
+        function getCurrentOptions() {
+            const inputs = document.querySelectorAll('#optionsContainer input');
+            const currentOptions = [];
+            inputs.forEach(input => {
+                if (input.value.trim()) {
+                    currentOptions.push(input.value.trim());
+                }
+            });
+            return currentOptions;
+        }
+
+        // Screen navigation
+        function showMainMenu() {
+            hideAllScreens();
+            document.getElementById('mainMenuScreen').classList.add('active');
+            playClickSound();
+        }
+
+        function showSetupScreen() {
+            hideAllScreens();
+            document.getElementById('setupScreen').classList.add('active');
+            playClickSound();
+        }
+
+        function showIdeaGeneratorScreen() {
+            hideAllScreens();
+            document.getElementById('ideaGeneratorScreen').classList.add('active');
+            
+            // Preserve existing selections
+            const existingOptions = getCurrentOptions();
+            existingOptions.forEach(option => {
+                selectedActivities.add(option);
+            });
+            
+            renderCategories();
+            renderSuggestions();
+            updateSelectedCount();
+            playClickSound();
+        }
+
+        function showSurpriseScreen() {
+            hideAllScreens();
+            document.getElementById('surpriseScreen').classList.add('active');
+            playClickSound();
+        }
+
+        function showBillSplitterScreen() {
+            hideAllScreens();
+            document.getElementById('billSplitterScreen').classList.add('active');
+            playClickSound();
+        }
+
+        function showCoinFlipScreen() {
+            hideAllScreens();
+            document.getElementById('coinFlipScreen').classList.add('active');
+            playClickSound();
+        }
+
+        function showRandomNumberScreen() {
+            hideAllScreens();
+            document.getElementById('randomNumberScreen').classList.add('active');
+            playClickSound();
+        }
+
+        function showListOrdererScreen() {
+            hideAllScreens();
+            document.getElementById('listOrdererScreen').classList.add('active');
+            playClickSound();
+        }
+
+        function hideAllScreens() {
+            document.querySelectorAll('.screen').forEach(screen => {
+                screen.classList.remove('active');
+            });
+        }
+
+        // Idea Generator Functions
+        function renderCategories() {
+            const grid = document.getElementById('categoryGrid');
+            grid.innerHTML = '';
+            
+            Object.entries(activityDatabase).forEach(([key, category]) => {
+                const btn = document.createElement('div');
+                btn.className = 'category-btn';
+                if (activeCategories.has(key)) {
+                    btn.classList.add('active');
+                }
+                btn.dataset.category = key;
+                btn.onclick = () => toggleCategory(key);
+                btn.innerHTML = `
+                    <div class="category-btn-icon">${category.icon}</div>
+                    <div>${category.name}</div>
+                `;
+                grid.appendChild(btn);
+            });
+        }
+
+        function toggleCategory(categoryKey) {
+            if (activeCategories.has(categoryKey)) {
+                activeCategories.delete(categoryKey);
+            } else {
+                activeCategories.add(categoryKey);
+            }
+            
+            const btn = document.querySelector(`[data-category="${categoryKey}"]`);
+            btn.classList.toggle('active');
+            playClickSound();
+            renderSuggestions();
+        }
+
+        function setupFilterListeners() {
+            document.addEventListener('click', (e) => {
+                if (e.target.classList.contains('filter-chip')) {
+                    const filter = e.target.dataset.filter;
+                    const value = e.target.dataset.value;
+                    
+                    // Toggle filter
+                    if (activeFilters[filter] === value) {
+                        activeFilters[filter] = null;
+                        e.target.classList.remove('active');
+                    } else {
+                        // Remove active from other chips in same group
+                        document.querySelectorAll(`[data-filter="${filter}"]`).forEach(chip => {
+                            chip.classList.remove('active');
+                        });
+                        activeFilters[filter] = value;
+                        e.target.classList.add('active');
+                    }
+                    
+                    playClickSound();
+                    renderSuggestions();
+                }
+            });
+        }
+
+        function renderSuggestions() {
+            const container = document.getElementById('suggestionsContainer');
+            
+            let suggestions = [];
+            
+            // Get activities from selected categories (or all if none selected)
+            if (activeCategories.size === 0) {
+                Object.values(activityDatabase).forEach(category => {
+                    suggestions = [...suggestions, ...category.activities];
+                });
+            } else {
+                activeCategories.forEach(cat => {
+                    suggestions = [...suggestions, ...activityDatabase[cat].activities];
+                });
+            }
+            
+            // Apply filters
+            suggestions = suggestions.filter(activity => {
+                for (const [filterType, filterValue] of Object.entries(activeFilters)) {
+                    if (filterValue && !activity.tags.includes(filterValue)) {
+                        return false;
+                    }
+                }
+                return true;
+            });
+            
+            // Render suggestions
+            container.innerHTML = '';
+            suggestions.forEach((activity) => {
+                const item = document.createElement('div');
+                item.className = 'suggestion-item';
+                if (selectedActivities.has(activity.name)) {
+                    item.classList.add('selected');
+                }
+                item.onclick = () => toggleActivitySelection(activity.name);
+                
+                item.innerHTML = `
+                    <div class="suggestion-info">
+                        <div class="suggestion-name">${activity.name}</div>
+                        <div class="suggestion-tags">
+                            ${activity.tags.map(tag => `<span class="suggestion-tag">${tag}</span>`).join('')}
+                        </div>
+                        <div style="color: var(--text-dim); font-size: 0.9rem; margin-top: 5px;">
+                            ${activity.description}
+                        </div>
+                    </div>
+                    <div class="suggestion-checkbox">${selectedActivities.has(activity.name) ? '✓' : '○'}</div>
+                `;
+                
+                container.appendChild(item);
+            });
+            
+            if (suggestions.length === 0) {
+                container.innerHTML = '<p style="text-align: center; color: var(--text-dim);">No activities match your criteria. Try adjusting filters!</p>';
+            }
+        }
+
+        function toggleActivitySelection(activityName) {
+            if (selectedActivities.has(activityName)) {
+                selectedActivities.delete(activityName);
+            } else {
+                selectedActivities.add(activityName);
+            }
+            
+            playClickSound();
+            updateSelectedCount();
+            renderSuggestions();
+        }
+
+        function updateSelectedCount() {
+            document.getElementById('selectedCount').textContent = `${selectedActivities.size} selected`;
+        }
+
+        function clearSelections() {
+            selectedActivities.clear();
+            playClickSound();
+            updateSelectedCount();
+            renderSuggestions();
+        }
+
+        function proceedWithSelections() {
+            if (selectedActivities.size === 0) {
+                alert('Please select at least one activity!');
+                return;
+            }
+            
+            // Update options with all selected activities
+            options = Array.from(selectedActivities);
+            
+            // Show setup screen with pre-filled options
+            showSetupScreen();
+            
+            // Update the option inputs
+            const container = document.getElementById('optionsContainer');
+            container.innerHTML = '';
+            
+            options.forEach((option, index) => {
+                const div = document.createElement('div');
+                div.className = 'option-item';
+                div.innerHTML = `
+                    <input type="text" value="${option}" placeholder="Option ${index + 1}">
+                    ${index >= 2 ? `<button class="btn btn-secondary" onclick="removeOption(this)">×</button>` : ''}
+                `;
+                container.appendChild(div);
+            });
+            
+            playSuccessSound();
+        }
+
+        // Surprise Me Functions
+        function spinSurpriseWheel() {
+            const wheel = document.getElementById('surpriseWheelInner');
+            wheel.classList.add('spinning');
+            playWheelSound();
+            
+            // Get random activity
+            const allActivities = [];
+            Object.values(activityDatabase).forEach(category => {
+                allActivities.push(...category.activities);
+            });
+            
+            currentSurpriseSuggestion = allActivities[Math.floor(Math.random() * allActivities.length)];
+            
+            setTimeout(() => {
+                wheel.classList.remove('spinning');
+                showSurpriseResult();
+            }, 500);
+        }
+
+        function showSurpriseResult() {
+            const resultDiv = document.getElementById('surpriseResult');
+            resultDiv.style.display = 'block';
+            
+            document.getElementById('surpriseActivity').textContent = currentSurpriseSuggestion.name;
+            document.getElementById('surpriseDetails').innerHTML = `
+                ${currentSurpriseSuggestion.description}<br>
+                <span style="font-size: 0.9rem;">Tags: ${currentSurpriseSuggestion.tags.join(', ')}</span>
+            `;
+            
+            // Add to history
+            surpriseHistory.unshift(currentSurpriseSuggestion.name);
+            if (surpriseHistory.length > 5) surpriseHistory.pop();
+            updateSurpriseHistory();
+            
+            playSuccessSound();
+        }
+
+        function updateSurpriseHistory() {
+            const historyDiv = document.getElementById('surpriseHistory');
+            if (surpriseHistory.length === 0) {
+                historyDiv.innerHTML = '<p>No suggestions yet. Give the wheel a spin!</p>';
+            } else {
+                historyDiv.innerHTML = surpriseHistory
+                    .map((item, index) => `${index + 1}. ${item}`)
+                    .join('<br>');
+            }
+        }
+
+        function useSurpriseSuggestion() {
+            if (!currentSurpriseSuggestion) return;
+            
+            // Add to existing options
+            const existingOptions = getCurrentOptions();
+            
+            // Show setup screen
+            showSetupScreen();
+            
+            // Update options with existing plus new suggestion
+            const container = document.getElementById('optionsContainer');
+            const newIndex = existingOptions.length;
+            
+            if (newIndex < 2) {
+                // Replace empty slot
+                const inputs = container.querySelectorAll('input');
+                inputs[newIndex].value = currentSurpriseSuggestion.name;
+            } else {
+                // Add new option
+                const div = document.createElement('div');
+                div.className = 'option-item';
+                div.innerHTML = `
+                    <input type="text" value="${currentSurpriseSuggestion.name}" placeholder="Option ${newIndex + 1}">
+                    <button class="btn btn-secondary" onclick="removeOption(this)">×</button>
+                `;
+                container.appendChild(div);
+            }
+            
+            playSuccessSound();
+        }
+
+        // Recent Favorites
+        function loadRecentFavorites() {
+            // In a real app, this would load from localStorage
+            recentFavorites = ['Movie Night', 'Pizza Night', 'Board Game Night', 'Hiking Adventure'];
+            updateRecentFavorites();
+        }
+
+        function updateRecentFavorites() {
+            const container = document.getElementById('recentFavorites');
+            if (recentFavorites.length === 0) {
+                container.innerHTML = '<p style="color: var(--text-dim);">No favorites yet. Start making decisions!</p>';
+            } else {
+                container.innerHTML = recentFavorites
+                    .map(fav => `<span class="filter-chip" onclick="quickAddFavorite('${fav}')">${fav}</span>`)
+                    .join(' ');
+            }
+        }
+
+        function quickAddFavorite(favorite) {
+            // Add to existing options
+            const existingOptions = getCurrentOptions();
+            
+            showSetupScreen();
+            
+            const container = document.getElementById('optionsContainer');
+            const newIndex = existingOptions.length;
+            
+            if (newIndex < 2) {
+                // Replace empty slot
+                const inputs = container.querySelectorAll('input');
+                inputs[newIndex].value = favorite;
+            } else {
+                // Add new option
+                const div = document.createElement('div');
+                div.className = 'option-item';
+                div.innerHTML = `
+                    <input type="text" value="${favorite}" placeholder="Option ${newIndex + 1}">
+                    <button class="btn btn-secondary" onclick="removeOption(this)">×</button>
+                `;
+                container.appendChild(div);
+            }
+            
+            playClickSound();
+        }
+
+        // Original app functions (modified to preserve state)
+        function updateParticipantNames() {
+            const count = parseInt(document.getElementById('participantCount').value);
+            const section = document.getElementById('participantNamesSection');
+            const container = document.getElementById('participantNameInputs');
+            
+            if (count > 1) {
+                section.style.display = 'block';
+                container.innerHTML = '';
+                
+                for (let i = 0; i < count; i++) {
+                    const input = document.createElement('input');
+                    input.type = 'text';
+                    input.placeholder = `Participant ${i + 1} name (optional)`;
+                    input.className = 'participant-name-input';
+                    input.style.marginBottom = '10px';
+                    container.appendChild(input);
+                }
+            } else {
+                section.style.display = 'none';
+            }
+        }
+
+        function addOption() {
+            playClickSound();
+            const container = document.getElementById('optionsContainer');
+            if (container.children.length >= 10) {
+                alert('Maximum 10 options allowed!');
+                return;
+            }
+            
+            const div = document.createElement('div');
+            div.className = 'option-item';
+            div.innerHTML = `
+                <input type="text" placeholder="Option ${container.children.length + 1}">
+                <button class="btn btn-secondary" onclick="removeOption(this)">×</button>
+            `;
+            container.appendChild(div);
+        }
+
+        function removeOption(btn) {
+            playClickSound();
+            const container = document.getElementById('optionsContainer');
+            if (container.children.length > 2) {
+                btn.parentElement.remove();
+            }
+        }
+
+        function startVoting() {
+            const inputs = document.querySelectorAll('#optionsContainer input');
+            options = [];
+            
+            inputs.forEach(input => {
+                if (input.value.trim()) {
+                    options.push(input.value.trim());
+                }
+            });
+
+            if (options.length < 2) {
+                alert('Please enter at least 2 options!');
+                return;
+            }
+
+            const participantCount = parseInt(document.getElementById('participantCount').value);
+            if (participantCount < 1) {
+                alert('Please enter a valid number of participants!');
+                return;
+            }
+
+            // Store original options for potential tie breaker
+            originalOptions = [...options];
+
+            // Get participant names
+            participants = [];
+            const nameInputs = document.querySelectorAll('.participant-name-input');
+            for (let i = 0; i < participantCount; i++) {
+                const name = nameInputs[i]?.value?.trim() || `Player ${i + 1}`;
+                participants.push({
+                    name: name,
+                    emoji: emojis[i % emojis.length],
+                    avatar: avatarEmojis[i % avatarEmojis.length],
+                    voted: false
+                });
+            }
+
+            currentParticipantIndex = 0;
+            votes = [];
+            isTieBreakerRound = false;
+            playSuccessSound();
+            showVotingScreen();
+        }
+
+        function showVotingScreen() {
+            hideAllScreens();
+            document.getElementById('votingScreen').classList.add('active');
+            
+            const participant = participants[currentParticipantIndex];
+            document.getElementById('currentParticipantName').textContent = participant.name;
+            document.getElementById('participantEmoji').textContent = participant.avatar;
+            
+            // Update progress
+            const progress = (currentParticipantIndex / participants.length) * 100;
+            document.getElementById('votingProgress').style.width = `${progress}%`;
+            
+            // Show participant progress
+            const progressContainer = document.getElementById('participantProgress');
+            progressContainer.innerHTML = '';
+            participants.forEach((p, i) => {
+                const div = document.createElement('div');
+                div.className = `participant-item ${p.voted ? 'completed' : ''}`;
+                div.innerHTML = `
+                    <span class="participant-avatar">${p.emoji}</span>
+                    <span>${p.name}</span>
+                `;
+                progressContainer.appendChild(div);
+            });
+            
+            // Show/hide third choice based on number of options
+            const thirdSection = document.getElementById('thirdChoiceSection');
+            thirdSection.style.display = options.length >= 3 ? 'block' : 'none';
+            
+            // Reset choices
+            firstChoice = null;
+            secondChoice = null;
+            thirdChoice = null;
+            
+            // Create choice cards
+            createChoiceCards();
+        }
+
+        function createChoiceCards() {
+            const firstGrid = document.getElementById('firstChoiceGrid');
+            const secondGrid = document.getElementById('secondChoiceGrid');
+            const thirdGrid = document.getElementById('thirdChoiceGrid');
+            
+            firstGrid.innerHTML = '';
+            secondGrid.innerHTML = '';
+            thirdGrid.innerHTML = '';
+            
+            options.forEach((option, index) => {
+                firstGrid.appendChild(createChoiceCard(option, index, 'first'));
+                secondGrid.appendChild(createChoiceCard(option, index, 'second'));
+                if (options.length >= 3) {
+                    thirdGrid.appendChild(createChoiceCard(option, index, 'third'));
+                }
+            });
+        }
+
+        function createChoiceCard(option, index, type) {
+            const card = document.createElement('div');
+            card.className = 'choice-card';
+            card.innerHTML = option;
+            card.onclick = () => selectChoice(index, type);
+            return card;
+        }
+
+        function selectChoice(index, type) {
+            playClickSound();
+            
+            if (type === 'first') {
+                document.querySelectorAll('#firstChoiceGrid .choice-card').forEach(card => {
+                    card.classList.remove('selected-first');
+                });
+                document.querySelectorAll('#firstChoiceGrid .choice-card')[index].classList.add('selected-first');
+                firstChoice = index;
+            } else if (type === 'second') {
+                document.querySelectorAll('#secondChoiceGrid .choice-card').forEach(card => {
+                    card.classList.remove('selected-second');
+                });
+                document.querySelectorAll('#secondChoiceGrid .choice-card')[index].classList.add('selected-second');
+                secondChoice = index;
+            } else if (type === 'third') {
+                document.querySelectorAll('#thirdChoiceGrid .choice-card').forEach(card => {
+                    card.classList.remove('selected-third');
+                });
+                document.querySelectorAll('#thirdChoiceGrid .choice-card')[index].classList.add('selected-third');
+                thirdChoice = index;
+            }
+        }
+
+        function submitVote() {
+            if (firstChoice === null || secondChoice === null) {
+                alert('Please select your first and second choices!');
+                return;
+            }
+
+            if (options.length >= 3 && thirdChoice === null && !isTieBreakerRound) {
+                alert('Please select your third choice!');
+                return;
+            }
+
+            const choices = [firstChoice, secondChoice];
+            if (thirdChoice !== null) choices.push(thirdChoice);
+            
+            if (new Set(choices).size !== choices.length) {
+                alert('Please select different options for each choice!');
+                return;
+            }
+
+            votes.push({
+                participant: participants[currentParticipantIndex].name,
+                first: firstChoice,
+                second: secondChoice,
+                third: thirdChoice
+            });
+
+            participants[currentParticipantIndex].voted = true;
+            currentParticipantIndex++;
+
+            playSuccessSound();
+
+            if (currentParticipantIndex < participants.length) {
+                showVotingScreen();
+            } else {
+                checkForTie();
+            }
+        }
+
+        function checkForTie() {
+            const results = calculateIntelligentResults();
+            
+            // Check if there's a tie at the top
+            const topScore = results[0].harmonyScore;
+            tiedOptions = results.filter(r => Math.abs(r.harmonyScore - topScore) < 0.01);
+            
+            if (tiedOptions.length > 1 && !isTieBreakerRound) {
+                // Store original votes before tie breaker
+                originalVotes = [...votes];
+                showTieBreakerScreen();
+            } else {
+                showResults();
+            }
+        }
+
+        function showTieBreakerScreen() {
+            hideAllScreens();
+            document.getElementById('tieBreakerScreen').classList.add('active');
+            
+            // Reset coin
+            const coin = document.getElementById('coin');
+            coin.classList.remove('flipping');
+            coin.style.setProperty('--final-rotation', '0deg');
+            
+            // Show tied options
+            const tiedOptionsContainer = document.getElementById('tiedOptions');
+            tiedOptionsContainer.innerHTML = '';
+            tiedOptions.forEach(option => {
+                const badge = document.createElement('div');
+                badge.className = 'tied-option-badge';
+                badge.textContent = option.option;
+                tiedOptionsContainer.appendChild(badge);
+            });
+            
+            // Reset UI
+            document.getElementById('flipButton').style.display = 'inline-block';
+            document.getElementById('coinResult').style.display = 'none';
+        }
+
+        function flipCoin() {
+            playClickSound();
+            playCoinSound();
+            
+            const coin = document.getElementById('coin');
+            const flipButton = document.getElementById('flipButton');
+            
+            flipButton.disabled = true;
+            flipButton.style.display = 'none';
+            
+            // Random result
+            coinFlipResult = Math.random() < 0.5 ? 'heads' : 'tails';
+            const finalRotation = coinFlipResult === 'heads' ? 0 : 180;
+            
+            // Add some extra spins for effect
+            coin.style.setProperty('--final-rotation', `${finalRotation}deg`);
+            coin.classList.add('flipping');
+            
+            setTimeout(() => {
+                showCoinResult();
+            }, 2000);
+        }
+
+        function showCoinResult() {
+            const resultDiv = document.getElementById('coinResult');
+            const resultText = document.getElementById('coinResultText');
+            const proceedButton = document.getElementById('proceedButton');
+            
+            resultDiv.style.display = 'block';
+            
+            if (coinFlipResult === 'heads') {
+                resultText.innerHTML = '🏆 HEADS! Time for a Tie Breaker Round!';
+                resultText.style.color = 'var(--warning)';
+                proceedButton.textContent = 'Start Tie Breaker Round';
+            } else {
+                resultText.innerHTML = '🎲 TAILS! Let fate decide!';
+                resultText.style.color = 'var(--primary)';
+                proceedButton.textContent = 'Reveal Random Winner';
+            }
+            
+            playSuccessSound();
+        }
+
+        function proceedAfterCoinFlip() {
+            if (coinFlipResult === 'heads') {
+                // Start tie breaker round
+                isTieBreakerRound = true;
+                options = tiedOptions.map(t => t.option);
+                votes = [];
+                currentParticipantIndex = 0;
+                
+                // Reset participant voting status
+                participants.forEach(p => p.voted = false);
+                
+                showVotingScreen();
+            } else {
+                // Random selection
+                const randomWinner = tiedOptions[Math.floor(Math.random() * tiedOptions.length)];
+                
+                // Adjust the results to make the random winner the top choice
+                const results = calculateIntelligentResults();
+                const winnerIndex = results.findIndex(r => r.option === randomWinner.option);
+                if (winnerIndex > 0) {
+                    [results[0], results[winnerIndex]] = [results[winnerIndex], results[0]];
+                }
+                
+                showResultsWithData(results, true);
+            }
+        }
+
+        function calculateIntelligentResults() {
+            const currentOptions = isTieBreakerRound ? options : originalOptions;
+            const scores = new Array(currentOptions.length).fill(0);
+            const firstVotes = new Array(currentOptions.length).fill(0);
+            const secondVotes = new Array(currentOptions.length).fill(0);
+            const thirdVotes = new Array(currentOptions.length).fill(0);
+            
+            // Count votes with weighted scoring
+            votes.forEach(vote => {
+                scores[vote.first] += 5;
+                scores[vote.second] += 3;
+                if (vote.third !== null) scores[vote.third] += 1;
+                
+                firstVotes[vote.first]++;
+                secondVotes[vote.second]++;
+                if (vote.third !== null) thirdVotes[vote.third]++;
+            });
+
+            // Calculate variance and satisfaction metrics
+            const results = currentOptions.map((option, index) => {
+                const totalVotes = firstVotes[index] + secondVotes[index] + thirdVotes[index];
+                const averagePosition = totalVotes > 0 ? 
+                    (firstVotes[index] * 1 + secondVotes[index] * 2 + thirdVotes[index] * 3) / totalVotes : 3;
+                
+                // Calculate how many people would be satisfied (voted for it at all)
+                const satisfiedCount = votes.filter(v => 
+                    v.first === index || v.second === index || v.third === index
+                ).length;
+                
+                // Harmony score considers both total score and distribution
+                const harmonyScore = scores[index] * (satisfiedCount / participants.length);
+                
+                return {
+                    option,
+                    score: scores[index],
+                    firstVotes: firstVotes[index],
+                    secondVotes: secondVotes[index],
+                    thirdVotes: thirdVotes[index],
+                    totalVotes,
+                    satisfiedCount,
+                    satisfactionRate: (satisfiedCount / participants.length) * 100,
+                    averagePosition,
+                    harmonyScore,
+                    index
+                };
+            });
+
+            // Intelligent sorting: prioritize options that satisfy the most people
+            results.sort((a, b) => {
+                // If one option satisfies significantly more people, choose it
+                if (Math.abs(a.satisfiedCount - b.satisfiedCount) >= participants.length * 0.3) {
+                    return b.satisfiedCount - a.satisfiedCount;
+                }
+                // Otherwise, use harmony score
+                if (a.harmonyScore !== b.harmonyScore) {
+                    return b.harmonyScore - a.harmonyScore;
+                }
+                // Fallback to raw score
+                return b.score - a.score;
+            });
+
+            return results;
+        }
+
+        function showResults() {
+            showResultsWithData(calculateIntelligentResults(), false);
+        }
+
+        function showResultsWithData(results, wasRandom) {
+            hideAllScreens();
+            document.getElementById('resultsScreen').classList.add('active');
+
+            const winner = results[0];
+
+            // Add to recent favorites
+            if (!recentFavorites.includes(winner.option)) {
+                recentFavorites.unshift(winner.option);
+                if (recentFavorites.length > 4) recentFavorites.pop();
+            }
+
+            // Create wheel with appropriate options
+            const wheelOptions = isTieBreakerRound ? options : originalOptions;
+            createDecisionWheel(wheelOptions);
+            
+            // Spin the wheel
+            setTimeout(() => {
+                playWheelSound();
+                const winnerIndexInWheel = wheelOptions.indexOf(winner.option);
+                spinWheel(winnerIndexInWheel);
+            }, 500);
+
+            // Show winner after wheel spin
+            setTimeout(() => {
+                document.getElementById('winnerOption').style.opacity = '1';
+                document.getElementById('winnerOption').textContent = winner.option;
+                playSuccessSound();
+                createConfetti();
+                
+                // Show satisfaction
+                const satisfaction = Math.round(winner.satisfactionRate);
+                animateSatisfactionMeter(satisfaction);
+                
+                // Explain the decision
+                explainDecision(winner, results, wasRandom);
+                
+                // Show detailed breakdown
+                showDetailedBreakdown(results);
+                
+                // Show fun fact
+                showFunFact(winner, results, wasRandom);
+            }, 4000);
+        }
+
+        function createDecisionWheel(wheelOptions) {
+            const wheel = document.getElementById('decisionWheel');
+            wheel.innerHTML = '';
+            
+            const segmentAngle = 360 / wheelOptions.length;
+            const colors = [
+                '#6366f1', '#8b5cf6', '#ec4899', '#f59e0b', 
+                '#10b981', '#14b8a6', '#3b82f6', '#f97316'
+            ];
+            
+            wheelOptions.forEach((option, index) => {
+                const segment = document.createElement('div');
+                segment.className = 'wheel-segment';
+                segment.style.transform = `rotate(${index * segmentAngle}deg)`;
+                segment.style.background = colors[index % colors.length];
+                segment.style.clipPath = `polygon(0 100%, 100% 100%, 100% 0)`;
+                
+                const text = document.createElement('div');
+                text.style.transform = `rotate(${segmentAngle / 2}deg)`;
+                text.style.position = 'absolute';
+                text.style.left = '25%';
+                text.style.top = '25%';
+                text.textContent = option.substring(0, 15) + (option.length > 15 ? '...' : '');
+                segment.appendChild(text);
+                
+                wheel.appendChild(segment);
+            });
+        }
+
+        function spinWheel(winnerIndex) {
+            const wheel = document.getElementById('decisionWheel');
+            const segmentAngle = 360 / (isTieBreakerRound ? options.length : originalOptions.length);
+            const targetAngle = -winnerIndex * segmentAngle + 90;
+            const spins = 5;
+            const finalAngle = spins * 360 + targetAngle;
+            
+            wheel.style.transform = `rotate(${finalAngle}deg)`;
+        }
+
+        function animateSatisfactionMeter(satisfaction) {
+            setTimeout(() => {
+                document.getElementById('satisfactionFill').style.width = `${satisfaction}%`;
+                document.getElementById('satisfactionLabel').textContent = `${satisfaction}%`;
+            }, 100);
+        }
+
+        function explainDecision(winner, results, wasRandom) {
+            const explanation = document.getElementById('resultExplanation');
+            let text = '';
+            
+            if (wasRandom) {
+                text = `🎲 Lady Luck has spoken! "${winner.option}" was randomly selected from the tied options by the coin flip.`;
+            } else if (isTieBreakerRound) {
+                text = `⚔️ After an intense tie-breaker round, "${winner.option}" emerged victorious!`;
+            } else if (winner.satisfactionRate === 100) {
+                text = `🎯 Perfect harmony! Everyone voted for "${winner.option}" - a unanimous favorite!`;
+            } else if (winner.satisfactionRate >= 80) {
+                text = `🌟 Excellent choice! ${winner.satisfiedCount} out of ${participants.length} participants included "${winner.option}" in their preferences.`;
+            } else if (winner.satisfactionRate >= 60) {
+                text = `✨ Good compromise! While opinions varied, "${winner.option}" satisfies the most people overall.`;
+            } else {
+                text = `🤝 Tough decision! With diverse preferences, "${winner.option}" emerged as the best balance between everyone's choices.`;
+            }
+            
+            explanation.innerHTML = `<strong>Why this choice?</strong><br>${text}`;
+        }
+
+        function showDetailedBreakdown(results) {
+            const breakdown = document.getElementById('resultsBreakdown');
+            breakdown.innerHTML = '<h3 style="margin-bottom: 20px;">Detailed Results</h3>';
+            
+            if (isTieBreakerRound) {
+                const note = document.createElement('p');
+                note.style.color = 'var(--text-dim)';
+                note.style.marginBottom = '20px';
+                note.innerHTML = '⚔️ <em>Results from the tie-breaker round</em>';
+                breakdown.appendChild(note);
+            }
+            
+            results.forEach((result, index) => {
+                const item = document.createElement('div');
+                item.style.marginBottom = '20px';
+                item.style.padding = '15px';
+                item.style.background = index === 0 ? 'rgba(99, 102, 241, 0.1)' : 'var(--bg)';
+                item.style.borderRadius = '12px';
+                item.style.border = index === 0 ? '2px solid var(--primary)' : '1px solid var(--surface-light)';
+                
+                item.innerHTML = `
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                        <strong style="font-size: 1.1rem;">${result.option}</strong>
+                        <span style="color: var(--text-dim);">${result.score} points</span>
+                    </div>
+                    <div class="vote-visual">
+                        ${Array(result.firstVotes).fill('<div class="vote-dot first"></div>').join('')}
+                        ${Array(result.secondVotes).fill('<div class="vote-dot second"></div>').join('')}
+                        ${Array(result.thirdVotes).fill('<div class="vote-dot third"></div>').join('')}
+                    </div>
+                    <small style="color: var(--text-dim);">
+                        ${result.firstVotes} first • ${result.secondVotes} second ${result.thirdVotes > 0 ? `• ${result.thirdVotes} third` : ''}
+                    </small>
+                `;
+                
+                breakdown.appendChild(item);
+            });
+        }
+
+        function showFunFact(winner, results, wasRandom) {
+            const facts = wasRandom ? [
+                `Cosmic coincidence: The universe chose "${winner.option}" through the ancient art of coin flipping!`,
+                `Fun fact: This decision was 50% skill, 50% luck, and 100% entertaining!`,
+                `Did you know? Coins have been making decisions for humans for over 2,000 years!`,
+                `Statistical anomaly: The coin chose the option that ${Math.round(winner.satisfiedCount / participants.length * 100)}% of you secretly wanted!`
+            ] : isTieBreakerRound ? [
+                `Epic showdown: "${winner.option}" survived both the initial vote AND the tie-breaker!`,
+                `Democracy wins: After ${votes.length * 2} total votes cast, we have a champion!`,
+                `Tie-breaker trivia: Only ${Math.round((tiedOptions.length / originalOptions.length) * 100)}% of options made it to the final round!`
+            ] : [
+                `Did you know? If this were a democracy, ${results.filter(r => r.firstVotes > 0).length} options would have had supporters!`,
+                `Fun fact: The winning option beat ${originalOptions.length - 1} other possibilities!`,
+                `Interesting: ${Math.round(winner.satisfiedCount / participants.length * 100)}% of the group will be happy with this choice!`,
+                `Statistics say: This decision-making method is 73% more fun than flipping a coin!`,
+                `Group dynamics: You just avoided ${originalOptions.length - 1} potential arguments!`
+            ];
+            
+            document.getElementById('funFact').innerHTML = facts[Math.floor(Math.random() * facts.length)];
+        }
+
+        function createConfetti() {
+            const container = document.getElementById('confettiContainer');
+            container.innerHTML = '';
+            const colors = ['#6366f1', '#8b5cf6', '#ec4899', '#10b981', '#f59e0b', '#ef4444'];
+            
+            for (let i = 0; i < 100; i++) {
+                setTimeout(() => {
+                    const confetti = document.createElement('div');
+                    confetti.className = 'confetti';
+                    confetti.style.left = Math.random() * 100 + '%';
+                    confetti.style.background = colors[Math.floor(Math.random() * colors.length)];
+                    confetti.style.animationDuration = (Math.random() * 3 + 2) + 's';
+                    confetti.style.animationDelay = Math.random() * 0.5 + 's';
+                    confetti.style.animation = 'confetti-fall ' + (Math.random() * 3 + 2) + 's linear forwards';
+                    container.appendChild(confetti);
+                    
+                    setTimeout(() => confetti.remove(), 5000);
+                }, i * 20);
+            }
+        }
+
+        function resetApp() {
+            playClickSound();
+            hideAllScreens();
+            showMainMenu();
+            
+            // Reset form
+            const container = document.getElementById('optionsContainer');
+            container.innerHTML = `
+                <div class="option-item">
+                    <input type="text" placeholder="Option 1 (e.g., Watch The Office)" value="">
+                </div>
+                <div class="option-item">
+                    <input type="text" placeholder="Option 2 (e.g., Play Board Games)" value="">
+                </div>
+            `;
+            
+            document.getElementById('participantCount').value = '2';
+            document.getElementById('participantNamesSection').style.display = 'none';
+            options = [];
+            votes = [];
+            participants = [];
+            tiedOptions = [];
+            coinFlipResult = null;
+            isTieBreakerRound = false;
+            originalOptions = [];
+            originalVotes = [];
+            selectedActivities.clear();
+            activeCategories.clear();
+            activeFilters = {
+                time: null,
+                energy: null,
+                budget: null,
+                location: null
+            };
+            updateSelectedCount();
+            updateRecentFavorites();
+            
+            // Clear filter selections
+            document.querySelectorAll('.filter-chip.active').forEach(chip => {
+                chip.classList.remove('active');
+            });
+        }
+
+        let deferredPrompt;
+        const installButton = document.getElementById('install-button');
+
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            installButton.style.display = 'block';
+        });
+
+        installButton.addEventListener('click', (e) => {
+            installButton.style.display = 'none';
+            deferredPrompt.prompt();
+            deferredPrompt.userChoice.then((choiceResult) => {
+                if (choiceResult.outcome === 'accepted') {
+                    console.log('User accepted the install prompt');
+                } else {
+                    console.log('User dismissed the install prompt');
+                }
+                deferredPrompt = null;
+            });
+        });
+        // Bill Splitter Logic
+        let selectedTipPercent = null;
+
+        function selectTip(percent) {
+            playClickSound();
+            selectedTipPercent = percent;
+            document.getElementById('customTip').value = '';
+            document.querySelectorAll('#tipPercentages .filter-chip').forEach(chip => {
+                chip.classList.remove('active');
+            });
+            const selectedChip = Array.from(document.querySelectorAll('#tipPercentages .filter-chip')).find(c => c.textContent.startsWith(percent));
+            if (selectedChip) {
+                selectedChip.classList.add('active');
+            }
+            calculateBill();
+        }
+
+        function selectCustomTip() {
+            selectedTipPercent = null;
+            document.querySelectorAll('#tipPercentages .filter-chip').forEach(chip => {
+                chip.classList.remove('active');
+            });
+            calculateBill();
+        }
+
+        function calculateBill() {
+            const billAmount = parseFloat(document.getElementById('billAmount').value);
+            const people = parseInt(document.getElementById('billPeople').value);
+            const customTip = parseFloat(document.getElementById('customTip').value);
+
+            if (isNaN(billAmount) || billAmount <= 0) {
+                document.getElementById('billResult').style.display = 'none';
+                return;
+            }
+
+            let tipPercent = selectedTipPercent;
+            if (!isNaN(customTip) && customTip >= 0) {
+                tipPercent = customTip;
+            }
+
+            if (tipPercent === null || isNaN(people) || people < 1) {
+                document.getElementById('billResult').style.display = 'none';
+                return;
+            }
+
+            const tipAmount = billAmount * (tipPercent / 100);
+            const totalAmount = billAmount + tipAmount;
+            const perPerson = totalAmount / people;
+
+            const resultDiv = document.getElementById('billResult');
+            resultDiv.style.display = 'block';
+            resultDiv.innerHTML = `
+                <p><strong>Tip Amount:</strong> $${tipAmount.toFixed(2)}</p>
+                <p><strong>Total Bill (with tip):</strong> $${totalAmount.toFixed(2)}</p>
+                ${people > 1 ? `<p style="font-size: 1.2rem; margin-top: 10px;"><strong>Total per person:</strong> <span style="color: var(--success);">$${perPerson.toFixed(2)}</span></p>` : ''}
+            `;
+        }
+
+        // Feature Coin Flip Logic
+        function flipFeatureCoin() {
+            playClickSound();
+            playCoinSound();
+            const coin = document.getElementById('featureCoin');
+            const btn = document.getElementById('flipFeatureCoinBtn');
+            const resultDiv = document.getElementById('featureCoinResult');
+            
+            btn.disabled = true;
+            resultDiv.textContent = '';
+            
+            const result = Math.random() < 0.5 ? 'HEADS' : 'TAILS';
+            const finalRotation = result === 'HEADS' ? 0 : 180;
+            
+            coin.style.transition = 'transform 2s cubic-bezier(0.175, 0.885, 0.32, 1.275)';
+            coin.style.transform = `rotateY(${finalRotation + 1800}deg)`;
+            
+            setTimeout(() => {
+                resultDiv.textContent = `It's ${result}!`;
+                btn.disabled = false;
+                playSuccessSound();
+            }, 2000);
+        }
+
+        // Random Number Logic
+        function generateRandomNumber() {
+            playClickSound();
+            const min = parseInt(document.getElementById('minNumber').value);
+            const max = parseInt(document.getElementById('maxNumber').value);
+            const resultDiv = document.getElementById('randomNumberResult');
+
+            if (isNaN(min) || isNaN(max)) {
+                resultDiv.textContent = 'Invalid';
+                return;
+            }
+
+            if (min > max) {
+                resultDiv.textContent = 'Min > Max';
+                return;
+            }
+
+            const randomNumber = Math.floor(Math.random() * (max - min + 1)) + min;
+            resultDiv.textContent = randomNumber;
+            playSuccessSound();
+        }
+
+        // List Orderer Logic
+        function addListItem() {
+            playClickSound();
+            const container = document.getElementById('listOrdererContainer');
+            if (container.children.length >= 20) {
+                alert('Maximum 20 items allowed!');
+                return;
+            }
+            
+            const div = document.createElement('div');
+            div.className = 'option-item';
+            div.innerHTML = `
+                <input type="text" placeholder="Item ${container.children.length + 1}">
+                <button class="btn btn-secondary" onclick="removeListItem(this)">×</button>
+            `;
+            container.appendChild(div);
+        }
+
+        function removeListItem(btn) {
+            playClickSound();
+            const container = document.getElementById('listOrdererContainer');
+            if (container.children.length > 2) {
+                btn.parentElement.remove();
+            }
+        }
+
+        function randomizeList() {
+            playClickSound();
+            const inputs = document.querySelectorAll('#listOrdererContainer input');
+            let items = [];
+            inputs.forEach(input => {
+                if (input.value.trim()) {
+                    items.push(input.value.trim());
+                }
+            });
+
+            if (items.length < 2) {
+                alert('Please enter at least 2 items to randomize!');
+                return;
+            }
+
+            // Fisher-Yates shuffle
+            for (let i = items.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [items[i], items[j]] = [items[j], items[i]];
+            }
+
+            const resultDiv = document.getElementById('listOrdererResult');
+            resultDiv.innerHTML = '<h3 style="margin-bottom: 15px;">Randomized Order:</h3>';
+            const ol = document.createElement('ol');
+            ol.style.paddingLeft = '20px';
+            items.forEach(item => {
+                const li = document.createElement('li');
+                li.textContent = item;
+                li.style.padding = '8px';
+                li.style.background = 'var(--bg)';
+                li.style.borderRadius = '8px';
+                li.style.marginBottom = '8px';
+                ol.appendChild(li);
+            });
+            resultDiv.appendChild(ol);
+            playSuccessSound();
+        }
+
+// Initialize app on load
+        window.addEventListener('load', () => {
+            initializeApp();
+        });
+    </script>
+
+
+</body></html>
