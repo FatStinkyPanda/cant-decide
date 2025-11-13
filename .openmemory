@@ -1,0 +1,3 @@
+GLOBAL_DIR=/home/runner/.openmemory-global
+PROJECT_NAME=cant-decide
+OPENMEMORY_URL=http://localhost:8080
